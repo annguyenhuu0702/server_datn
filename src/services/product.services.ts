@@ -446,6 +446,7 @@ export const product_services = {
         p,
         limit,
         name,
+        code,
         slug,
         otherSlug,
         sortBy,
@@ -461,6 +462,11 @@ export const product_services = {
           ...(name
             ? {
                 name: ILike(`%${name}%`),
+              }
+            : {}),
+          ...(code
+            ? {
+                code: ILike(`%${code}%`),
               }
             : {}),
           ...(slug
@@ -891,6 +897,12 @@ export const product_services = {
 
   getProductSelling: async (): Promise<resData<Product[]> | resMessage> => {
     try {
+      const startDate = new Date();
+      startDate.setDate(1); // Set the start date of the month
+      const endDate = new Date();
+      const currentMonth = endDate.getMonth();
+      endDate.setMonth(currentMonth + 1); // Set the end date of the month
+
       let data = await AppDataSource.getRepository(PaymentItem)
         .createQueryBuilder("items")
         .leftJoinAndSelect("items.productVariant", "pv")
@@ -905,9 +917,17 @@ export const product_services = {
         .andWhere("pr.isActive=:isActive", {
           isActive: false,
         })
+        .andWhere("p.createdAt >= :startDate", {
+          startDate: startDate.toISOString(),
+        })
+        .andWhere("p.createdAt < :endDate", {
+          endDate: endDate.toISOString(),
+        })
         .orderBy("sum(items.quantity)", "DESC")
         .getRawMany();
-      data = data.splice(0, 10);
+
+      data = data.slice(0, 15); // Get the top 15 products
+
       for (let i = 0; i < data.length; i++) {
         let newData = await Product.findOne({
           where: {
@@ -927,6 +947,19 @@ export const product_services = {
           ...newData,
         };
       }
+
+      data.sort((a, b) => {
+        if (a.total === b.total) {
+          // If the quantities are equal, prioritize the product with promotion
+          if (a.priceSale && !b.priceSale) {
+            return -1; // a should come before b
+          } else if (!a.priceSale && b.priceSale) {
+            return 1; // b should come before a
+          }
+        }
+        // Sort based on quantity in descending order
+        return b.total - a.total;
+      });
 
       return {
         status: 200,
@@ -948,6 +981,66 @@ export const product_services = {
       };
     }
   },
+
+  // getProductSelling: async (): Promise<resData<Product[]> | resMessage> => {
+  //   try {
+  //     let data = await AppDataSource.getRepository(PaymentItem)
+  //       .createQueryBuilder("items")
+  //       .leftJoinAndSelect("items.productVariant", "pv")
+  //       .leftJoinAndSelect("pv.product", "pr")
+  //       .leftJoinAndSelect("items.payment", "p")
+  //       .groupBy("pr.id")
+  //       .select("sum(items.quantity)", "total")
+  //       .addSelect("pr.id", "id")
+  //       .where("p.status=:status", {
+  //         status: "Đã giao hàng",
+  //       })
+  //       .andWhere("pr.isActive=:isActive", {
+  //         isActive: false,
+  //       })
+  //       .orderBy("sum(items.quantity)", "DESC")
+  //       .getRawMany();
+  //     data = data.splice(0, 10);
+  //     for (let i = 0; i < data.length; i++) {
+  //       let newData = await Product.findOne({
+  //         where: {
+  //           id: data[i].id,
+  //         },
+  //         relations: {
+  //           productCategory: true,
+  //           productImages: true,
+  //           productVariants: {
+  //             variantValues: true,
+  //           },
+  //         },
+  //       });
+
+  //       data[i] = {
+  //         ...data[i],
+  //         ...newData,
+  //       };
+  //     }
+
+  //     return {
+  //       status: 200,
+  //       data: {
+  //         data: {
+  //           rows: await product_services.updatePriceSale(data),
+  //           count: 0,
+  //         },
+  //         message: "Success",
+  //       },
+  //     };
+  //   } catch (error) {
+  //     console.log(error);
+  //     return {
+  //       status: 500,
+  //       data: {
+  //         message: "Error",
+  //       },
+  //     };
+  //   }
+  // },
 
   activeProduct: async (id: string, isActive: boolean): Promise<any> => {
     try {

@@ -374,22 +374,28 @@ export const auth_services = {
     body: changeProfile
   ): Promise<resMessage> => {
     try {
-      const item = await User.findOne({
-        where: {
+      // const item = await User.findOne({
+      //   where: {
+      //     id: parseInt(data.id),
+      //   },
+      // });
+      // if (item) {
+      //   if (item.avatar && item.avatar !== body.avatar) {
+      //     await getCloudinary().v2.uploader.destroy(
+      //       "canifa" + item.avatar.split("canifa")[1].split(".")[0]
+      //     );
+      //   }
+      // }
+      // await User.save({
+      //   ...item,
+      //   ...body,
+      // });
+      await User.update(
+        {
           id: parseInt(data.id),
         },
-      });
-      if (item) {
-        if (item.avatar && item.avatar !== body.avatar) {
-          await getCloudinary().v2.uploader.destroy(
-            "canifa" + item.avatar.split("canifa")[1].split(".")[0]
-          );
-        }
-      }
-      await User.save({
-        ...item,
-        ...body,
-      });
+        body
+      );
       return {
         status: 200,
         data: {
