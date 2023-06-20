@@ -948,18 +948,89 @@ export const product_services = {
         };
       }
 
+      // data.sort((a, b) => {
+      //   if (a.total === b.total) {
+      //     // If the quantities are equal, prioritize the product with promotion
+      //     const discountPercentA = (1 - a.priceSale / a.price) * 100;
+      //     const discountPercentB = (1 - b.priceSale / b.price) * 100;
+      //     if (a.priceSale && !b.priceSale) {
+      //       return -1; // a should come before b
+      //     } else if (!a.priceSale && b.priceSale) {
+      //       return 1; // b should come before a
+      //     } else if (a.priceSale && b.priceSale) {
+      //       // If both products have promotion, prioritize by promotion percentage
+      //       if (discountPercentA === discountPercentB) {
+      //         // If the promotion percentages are equal, prioritize the newer product
+      //         const aCreatedDate = new Date(a.createdAt).getTime();
+      //         const bCreatedDate = new Date(b.createdAt).getTime();
+      //         return bCreatedDate - aCreatedDate; // Sort in descending order of created date
+      //       }
+      //       return discountPercentB - discountPercentA; // Sort in descending order of promotion percentage
+      //     } else {
+      //       // If both products don't have promotion, prioritize the newer product
+      //       const aCreatedDate = new Date(a.createdAt).getTime();
+      //       const bCreatedDate = new Date(b.createdAt).getTime();
+      //       return bCreatedDate - aCreatedDate; // Sort in descending order of created date
+      //     }
+      //   }
+      //   // Sort based on quantity in descending order
+      //   return b.total - a.total;
+      // });
+
+      // data.sort((a, b) => {
+      //   if (a.total === b.total) {
+      //     const discountPercentA = (1 - a.priceSale / a.price) * 100;
+      //     const discountPercentB = (1 - b.priceSale / b.price) * 100;
+      //     // If the quantities are equal, prioritize the product with promotion
+      //     if (a.priceSale && !b.priceSale) {
+      //       return -1; // a should come before b
+      //     } else if (!a.priceSale && b.priceSale) {
+      //       return 1; // b should come before a
+      //     } else if (a.priceSale && b.priceSale) {
+      //       // If both products have promotion, prioritize by promotion percentage
+      //       return discountPercentB - discountPercentA; // Sort in descending order of promotion percentage
+      //     } else {
+      //       // If both products don't have promotion, prioritize the newer product
+      //       const aCreatedDate = new Date(a.createdAt).getTime();
+      //       const bCreatedDate = new Date(b.createdAt).getTime();
+      //       return bCreatedDate - aCreatedDate; // Sort in descending order of created date
+      //     }
+      //   }
+      //   // Sort based on quantity in descending order
+      //   return b.total - a.total;
+      // });
+
       data.sort((a, b) => {
         if (a.total === b.total) {
           // If the quantities are equal, prioritize the product with promotion
+
           if (a.priceSale && !b.priceSale) {
             return -1; // a should come before b
           } else if (!a.priceSale && b.priceSale) {
             return 1; // b should come before a
+          } else {
+            // If both products have promotion, prioritize the newer product
+            const aCreatedDate = new Date(a.createdAt).getTime();
+            const bCreatedDate = new Date(b.createdAt).getTime();
+            return bCreatedDate - aCreatedDate; // Sort in descending order of created date
           }
         }
         // Sort based on quantity in descending order
         return b.total - a.total;
       });
+
+      // data.sort((a, b) => {
+      //   if (a.total === b.total) {
+      //     // If the quantities are equal, prioritize the product with promotion
+      //     if (a.priceSale && !b.priceSale) {
+      //       return -1; // a should come before b
+      //     } else if (!a.priceSale && b.priceSale) {
+      //       return 1; // b should come before a
+      //     }
+      //   }
+      //   // Sort based on quantity in descending order
+      //   return b.total - a.total;
+      // });
 
       return {
         status: 200,
