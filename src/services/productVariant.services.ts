@@ -126,6 +126,9 @@ export const productVariant_services = {
       const [productVariants, count] = await ProductVariant.findAndCount({
         where: {
           inventory: LessThan(40),
+          product: {
+            isActive: false,
+          },
           ...(productId ? { productId: +productId } : {}),
           ...(name
             ? {
